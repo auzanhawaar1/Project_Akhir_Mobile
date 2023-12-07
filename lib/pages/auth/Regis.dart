@@ -1,8 +1,6 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, must_be_immutable, prefer_final_fields
-
-import 'package:posttest5/Auth.dart';
+import 'package:posttest5/pages/auth/Auth.dart';
 import 'package:flutter/material.dart';
-import 'package:posttest5/Login1.dart';
+import 'package:posttest5/pages/auth/login_page.dart';
 
 class Regis extends StatefulWidget {
   const Regis({super.key});
@@ -10,14 +8,12 @@ class Regis extends StatefulWidget {
   @override
   State<Regis> createState() => _RegisState();
 }
-
 class _RegisState extends State<Regis> {
   bool _loading = false;
+  bool registrationSuccess= true;
 
   final _formKey = GlobalKey<FormState>();
-
   final TextEditingController _ctrlEmail = TextEditingController();
-
   final TextEditingController _ctrlPassword = TextEditingController();
 
   handleSubmit() async {
@@ -25,13 +21,49 @@ class _RegisState extends State<Regis> {
     final email = _ctrlEmail.value.text;
     final password = _ctrlPassword.value.text;
     setState(() => _loading = true);
-    await Auth().regis(email, password);
-    setState(() => _loading = false);
+
+    try {
+      await Auth().register(email, password);
+
+      if (registrationSuccess) {
+        showSuccessSnackBar("You have successfully registered!");
+      } else {
+        showErrorSnackBar("Registration failed. Please try again.");
+      }
+    } catch (error) {
+      showErrorSnackBar("An error occurred during registration.");
+    } finally {
+      setState(() => _loading = false);
+    }
+  }
+
+  void showSuccessSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: Duration(seconds: 3),
+        backgroundColor: Color.fromRGBO(255, 29, 165, 210),
+      ),
+    );
+  }
+
+  void showErrorSnackBar(String errorMessage) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(errorMessage),
+        duration: Duration(seconds: 3),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 
   @override
-  Widget build(BuildContext context) {
+Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('REGISTER', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+        backgroundColor: Color.fromARGB(255, 29, 165, 210), 
+      ),
       body: Center(
         child: Form(
           key: _formKey,
@@ -51,7 +83,7 @@ class _RegisState extends State<Regis> {
                   controller: _ctrlEmail,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Silakan Masukkan Email Anda';
+                      return 'Please enter your email';
                     }
                     return null;
                   },
@@ -66,7 +98,7 @@ class _RegisState extends State<Regis> {
                   obscureText: true,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Silakan Masukkan Password Anda';
+                      return 'Please enter your password';
                     }
                     return null;
                   },
@@ -95,9 +127,9 @@ class _RegisState extends State<Regis> {
                 TextButton(
                   onPressed: () {
                     Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => Login()));
+                        MaterialPageRoute(builder: (context) => LoginPage()));
                   },
-                  child: Text("Sudah Punya Akun? Klik Disini Untuk Login"),
+                  child: Text("Already have an account? Click here to login"),
                 )
               ],
             ),
